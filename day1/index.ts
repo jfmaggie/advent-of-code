@@ -8,7 +8,7 @@ function getFuel(mass: number): number {
 
 console.log("12 -> 2, ", getFuel(12));
 console.log("14 -> 2, ", getFuel(14));
-console.log("1969 -> 654,  ", getFuel(1969));
+console.log("1969 -> 654, ", getFuel(1969));
 console.log("100756 -> 33583, ", getFuel(100756));
 
 const input = fs
@@ -22,7 +22,7 @@ const output1 = input
   .map(getFuel)
   .reduce((prevValue, currentValue) => prevValue + currentValue, 0);
 
-console.log("expect part 1 output: 3295424", output1);
+console.log("expect part 1 output: 3295424, ", output1);
 
 // Part 2
 const moduleFuels = input.map(mass => {
@@ -40,4 +40,4 @@ const output2 = moduleFuels.reduce(
   0
 );
 
-console.log("expect output2: 4940279", output2);
+console.log("expect output2: 4940279, ", output2);
