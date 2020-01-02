@@ -17,8 +17,27 @@ const input = fs
   .split("\n")
   .map(_.toNumber);
 
-const output = input
+// Part 1
+const output1 = input
   .map(getFuel)
   .reduce((prevValue, currentValue) => prevValue + currentValue, 0);
 
-console.log("expect output: 3295424", output);
+console.log("expect part 1 output: 3295424", output1);
+
+// Part 2
+const moduleFuels = input.map(mass => {
+  let total = 0;
+  let currentMass = getFuel(mass);
+  while (currentMass > 0) {
+    total += currentMass;
+    currentMass = getFuel(currentMass);
+  }
+  return total;
+});
+
+const output2 = moduleFuels.reduce(
+  (prevValue, currentValue) => prevValue + currentValue,
+  0
+);
+
+console.log("expect output2: 4940279", output2);
