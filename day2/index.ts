@@ -110,13 +110,42 @@ const formattedInput = fs
   .toString()
   .split(",")
   .map(toNumber);
-const program = new Program(formattedInput);
-program.replaceState(1, 12);
-program.replaceState(2, 2);
-program.run();
+
+const program1 = new Program(formattedInput);
+const noun1 = 12,
+  verb1 = 2,
+  result1 = 3716293;
+program1.replaceState(1, noun1);
+program1.replaceState(2, verb1);
+program1.run();
 
 console.log(
-  "==== Final state at position 0: 3716293\n",
-  program.getState().get(0),
+  `==== Final state at position 0: ${result1}\n`,
+  program1.getState().get(0),
   "\n"
+);
+
+// Part 2
+// noun: 0-99
+// verb: 0-99
+let noun2, verb2;
+
+for (let noun = 0; noun < 100; noun++) {
+  for (let verb = 0; verb < 100; verb++) {
+    const program = new Program(formattedInput);
+    program.replaceState(1, noun);
+    program.replaceState(2, verb);
+    program.run();
+    const result = program.getState().get(0);
+    if (result === 19690720) {
+      noun2 = noun;
+      verb2 = verb;
+    }
+  }
+}
+console.log("==== noun2: ", noun2, "\n");
+console.log("==== verb2: ", verb2, "\n");
+console.log(
+  "==== 100 * noun + verb = (expected 6429)",
+  (noun2 as number) * 100 + (verb2 as number)
 );
