@@ -34,28 +34,14 @@
 
 import fs from "fs";
 
-const wires = fs
-  .readFileSync(__dirname + "/input.txt")
-  .toString()
-  .split("\n");
-const wire1 = wires[0];
-const wire2 = wires[1];
-
-const testWire1_1 = "R8,U5,L5,D3";
-const testWire1_2 = "U7,R6,D4,L4";
-
-const testWire2_1 = "R75,D30,R83,U83,L12,D49,R71,U7,L72";
-const testWire2_2 = "U62,R66,U55,R34,D71,R55,D58,R83";
-
-const testWire3_1 = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51";
-const testWire3_2 = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7";
-
-function getResult(test1: string[], test2: string[]): number {
+function getResults(test1: string[], test2: string[]): number[] {
   const start = "1,1";
-  const nodes = new Set<string>();
-  const crossNodes = new Set<string>();
+  const nodes = new Map<string, number>();
+  const crossNodes = new Map<string, number>();
   let current = start;
   let distance = -1;
+  let depth = -1;
+  let result = 0;
 
   test1.map((w) => {
     const direction = w[0];
@@ -63,32 +49,40 @@ function getResult(test1: string[], test2: string[]): number {
 
     for (let i = 0; i < n; i++) {
       // add nodes and edge
-      nodes.add(current);
+      depth++;
+      nodes.set(current, depth);
       current = move(current, direction, 1);
     }
   });
 
   // reset start
   current = start;
+  depth = -1;
   test2.map((w) => {
     const direction = w[0];
     const n = parseInt(w.slice(1), 0);
 
     for (let i = 0; i < n; i++) {
+      depth++;
       if (nodes.has(current) && current !== start) {
-        crossNodes.add(current);
+        crossNodes.set(current, depth);
         const x = Math.abs(parseInt(current.split(",")[0], 0)) - 1;
         const y = Math.abs(parseInt(current.split(",")[1], 0)) - 1;
         const currentDistance = x + y;
         if (distance === -1 || distance > currentDistance) {
           distance = currentDistance;
         }
+        const firstSteps = nodes.get(current) || 0;
+        const currentSteps = firstSteps + depth;
+        if (result === 0 || result > currentSteps) {
+          result = currentSteps;
+        }
       }
       current = move(current, direction, 1);
     }
   });
 
-  return distance;
+  return [distance, result];
 }
 
 function move(location: string, direction: string, n: number): string {
@@ -113,26 +107,42 @@ function move(location: string, direction: string, n: number): string {
   }
 }
 
+const wires = fs
+  .readFileSync(__dirname + "/input.txt")
+  .toString()
+  .split("\n");
+
+const wire1 = wires[0];
+const wire2 = wires[1];
+
+const testWire1_1 = "R8,U5,L5,D3";
+const testWire1_2 = "U7,R6,D4,L4";
+
+const testWire2_1 = "R75,D30,R83,U83,L12,D49,R71,U7,L72";
+const testWire2_2 = "U62,R66,U55,R34,D71,R55,D58,R83";
+
+const testWire3_1 = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51";
+const testWire3_2 = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7";
+
+const result1 = getResults(testWire1_1.split(","), testWire1_2.split(","));
 console.log("============");
 console.log(testWire1_1);
-console.log(
-  `${testWire1_2} = distance 6 `,
-  getResult(testWire1_1.split(","), testWire1_2.split(","))
-);
+console.log(`${testWire1_2} = distance 6, 40 steps `, result1[0], result1[1]);
 
+const result2 = getResults(testWire2_1.split(","), testWire2_2.split(","));
 console.log("============");
 console.log(testWire2_1);
-console.log(
-  `${testWire2_2} = distance 159 `,
-  getResult(testWire2_1.split(","), testWire2_2.split(","))
-);
+console.log(`${testWire2_2} = distance 159, 610 steps`, result2[0], result2[1]);
 
+const result3 = getResults(testWire3_1.split(","), testWire3_2.split(","));
 console.log("============");
 console.log(testWire3_1);
 console.log(
-  `${testWire3_2} = distance 135 `,
-  getResult(testWire3_1.split(","), testWire3_2.split(","))
+  `${testWire3_2} = distance 135, 410 steps `,
+  result3[0],
+  result3[1]
 );
 
-console.log("============");
-console.log(getResult(wire1.split(","), wire2.split(",")));
+const result4 = getResults(wire1.split(","), wire2.split(","));
+console.log("============ 768, 8684");
+console.log(result4[0], result4[1]);
