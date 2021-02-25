@@ -1,4 +1,4 @@
-import { groupBy, last } from "lodash";
+// https://adventofcode.com/2019/day/4
 
 // 356261-846303
 function part1() {

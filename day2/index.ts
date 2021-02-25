@@ -53,7 +53,7 @@ class Program {
   }
 
   runCode(code: number, p1: number, p2: number, p3: number) {
-    if ([code, p1, p2, p3].some(val => val == undefined)) {
+    if ([code, p1, p2, p3].some((val) => val == undefined)) {
       return;
     }
 
