@@ -5,18 +5,15 @@ import readlineSync from "readline-sync";
 import toNumber from "lodash/toNumber";
 
 const OFFSET_4 = 4;
+const OFFSET_3 = 3;
 const OFFSET_2 = 2;
 const HALT_CODE = 99;
 
 class Program {
   instructions: Map<number, number>;
-  paramMode: number = 0;
   pointer: number = 0;
-  offset: number = 0;
-  haltCode: number;
 
   constructor(numbers: number[]) {
-    this.haltCode = HALT_CODE;
     this.instructions = new Map();
     numbers.forEach((num, idx) => {
       this.instructions.set(idx, num);
@@ -24,16 +21,9 @@ class Program {
   }
 
   run() {
-    // 1. start by requesting user input 1
-    // 2. perform tests; output instruction the test result (0: successful; non-0: not working)
-    // 3. output a diagnostic code and halt (get this code)
     while (this.pointer < this.instructions.size) {
       this.readInstruction(this.instructions.get(this.pointer)!);
-      this.pointer += this.offset;
-      // console.log("pointer at ", this.pointer);
     }
-
-    // console.log(this.instructions);
   }
 
   readInstruction(instruction: number) {
@@ -71,7 +61,7 @@ class Program {
             : this.instructions.get(thirdParam)!;
         const result = firstValue + secondValue;
         this.instructions.set(thirdValue, result);
-        this.offset = OFFSET_4;
+        this.pointer += OFFSET_4;
         break;
       }
       case 2: {
@@ -94,7 +84,7 @@ class Program {
             : this.instructions.get(thirdParam)!;
         const result = firstValue * secondValue;
         this.instructions.set(thirdValue, result);
-        this.offset = OFFSET_4;
+        this.pointer += OFFSET_4;
         break;
       }
       case 3: {
@@ -107,7 +97,7 @@ class Program {
 
         // store this input at position
         this.instructions.set(position, toNumber(input));
-        this.offset = OFFSET_2;
+        this.pointer += OFFSET_2;
         break;
       }
       case 4: {
@@ -118,7 +108,106 @@ class Program {
           firstParamMode === 0 ? this.instructions.get(position)! : position;
         // process.stdout.write(output.toString());
         console.log(output);
-        this.offset = OFFSET_2;
+        this.pointer += OFFSET_2;
+        break;
+      }
+      case 5: {
+        // if the first parameter is non-zero,
+        // it sets the instruction pointer to the value from the second parameter.
+        // Otherwise, it does nothing.
+        const firstParam = this.instructions.get(this.pointer + 1)!;
+        const firstValue =
+          firstParamMode === 0
+            ? this.instructions.get(firstParam)!
+            : firstParam;
+        const secondParam = this.instructions.get(this.pointer + 2)!;
+        const secondValue =
+          secondParamMode === 0
+            ? this.instructions.get(secondParam)!
+            : secondParam;
+        // console.log("==== firstValue", firstValue);
+        // console.log("==== secondValue", secondValue);
+        // console.log("==== this.pointer", this.pointer);
+        if (firstValue !== 0) {
+          this.pointer = secondValue;
+        } else {
+          this.pointer += OFFSET_3;
+        }
+        break;
+      }
+      case 6: {
+        // if the first parameter is zero,
+        // it sets the instruction pointer to the value from the second parameter.
+        // Otherwise, it does nothing.
+        const firstParam = this.instructions.get(this.pointer + 1)!;
+        const firstValue =
+          firstParamMode === 0
+            ? this.instructions.get(firstParam)!
+            : firstParam;
+        const secondParam = this.instructions.get(this.pointer + 2)!;
+        const secondValue =
+          secondParamMode === 0
+            ? this.instructions.get(secondParam)!
+            : secondParam;
+        if (firstValue === 0) {
+          this.pointer = secondValue;
+        } else {
+          this.pointer += OFFSET_3;
+        }
+        break;
+      }
+      case 7: {
+        // if the first parameter is less than the second parameter,
+        // it stores 1 in the position given by the third parameter.
+        // Otherwise, it stores 0.
+        const firstParam = this.instructions.get(this.pointer + 1)!;
+        const firstValue =
+          firstParamMode === 0
+            ? this.instructions.get(firstParam)!
+            : firstParam;
+        const secondParam = this.instructions.get(this.pointer + 2)!;
+        const secondValue =
+          secondParamMode === 0
+            ? this.instructions.get(secondParam)!
+            : secondParam;
+        const thirdParam = this.instructions.get(this.pointer + 3)!;
+        const thirdValue =
+          thirdParamMode === 0
+            ? thirdParam
+            : this.instructions.get(thirdParam)!;
+        if (firstValue < secondValue) {
+          this.instructions.set(thirdValue, 1);
+        } else {
+          this.instructions.set(thirdValue, 0);
+        }
+        this.pointer += OFFSET_4;
+        break;
+      }
+      case 8: {
+        // if the first parameter is less than the second parameter,
+        // it stores 1 in the position given by the third parameter.
+        // Otherwise, it stores 0.
+        const firstParam = this.instructions.get(this.pointer + 1)!;
+        const firstValue =
+          firstParamMode === 0
+            ? this.instructions.get(firstParam)!
+            : firstParam;
+        const secondParam = this.instructions.get(this.pointer + 2)!;
+        const secondValue =
+          secondParamMode === 0
+            ? this.instructions.get(secondParam)!
+            : secondParam;
+        const thirdParam = this.instructions.get(this.pointer + 3)!;
+        const thirdValue =
+          thirdParamMode === 0
+            ? thirdParam
+            : this.instructions.get(thirdParam)!;
+        if (firstValue === secondValue) {
+          this.instructions.set(thirdValue, 1);
+        } else {
+          this.instructions.set(thirdValue, 0);
+        }
+        this.pointer += OFFSET_4;
         break;
       }
       case HALT_CODE: {
@@ -139,5 +228,64 @@ const formattedInput = fs
   .map(toNumber);
 
 // part 1 expected result: 15386262
-const program = new Program(formattedInput);
-program.run();
+// 1. start by requesting user input
+// 2. perform tests; output instruction the test result (0: successful; non-0: not working)
+// 3. output a diagnostic code and halt (get this code)
+// const program1 = new Program(formattedInput);
+// program1.run();
+
+// part 2 expected result: 10376124
+// user input 5
+const program2 = new Program(formattedInput);
+program2.run();
+
+// const test1 = new Program([
+//   3,
+//   21,
+//   1008,
+//   21,
+//   8,
+//   20,
+//   1005,
+//   20,
+//   22,
+//   107,
+//   8,
+//   21,
+//   20,
+//   1006,
+//   20,
+//   31,
+//   1106,
+//   0,
+//   36,
+//   98,
+//   0,
+//   0,
+//   1002,
+//   21,
+//   125,
+//   20,
+//   4,
+//   20,
+//   1105,
+//   1,
+//   46,
+//   104,
+//   999,
+//   1105,
+//   1,
+//   46,
+//   1101,
+//   1000,
+//   1,
+//   20,
+//   4,
+//   20,
+//   1105,
+//   1,
+//   46,
+//   98,
+//   99,
+// ]);
+// test1.run();
