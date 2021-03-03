@@ -1,11 +1,14 @@
 // https://adventofcode.com/2019/day/6
 
 import fs from "fs";
+import { intersection } from "lodash";
 
-const nodes = new Set<string>();
 const edges = {} as {
   [key: string]: string[];
 };
+
+let startAt = "";
+let endAt = "";
 
 fs.readFileSync(__dirname + "/input.txt")
   .toString()
@@ -13,8 +16,14 @@ fs.readFileSync(__dirname + "/input.txt")
   .map((line) => {
     const node1 = line.trim().split(")")[0];
     const node2 = line.trim().split(")")[1];
-    nodes.add(node1);
-    nodes.add(node2);
+    // part 2 ====
+    if (node2 === "YOU") {
+      startAt = node1;
+    }
+    if (node2 === "SAN") {
+      endAt = node1;
+    }
+    // ====
     if (edges[node1]) {
       edges[node1].push(node2);
     } else {
@@ -22,8 +31,8 @@ fs.readFileSync(__dirname + "/input.txt")
     }
   });
 
+// part1
 let orbits = 0;
-
 function dfs(node: string, depth: number) {
   const children = edges[node];
   orbits += depth;
@@ -44,5 +53,28 @@ dfs("COM", 0);
 //   orbits += currentDepth;
 // }
 
-// 314247
-console.log("==== result", orbits);
+// part1: 314247;
+// console.log("==== result", orbits);
+
+// part 2
+const allNodes = Object.keys(edges);
+const allEdges = Object.values(edges);
+function linkToCom(node: string) {
+  let path = [] as string[];
+  function jump(node: string) {
+    path.push(node);
+    allEdges.forEach((edge, index) => {
+      if (edge.includes(node)) {
+        const next = allNodes[index];
+        jump(next);
+      }
+    });
+  }
+  jump(node);
+  return path;
+}
+const path1 = linkToCom(startAt);
+const path2 = linkToCom(endAt);
+const common = intersection(path1, path2);
+// expected 514
+console.log("=== result", path1.indexOf(common[0]) + path2.indexOf(common[0]));
